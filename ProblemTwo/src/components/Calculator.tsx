@@ -9,33 +9,42 @@ const Calculator: React.FC = () => {
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operator, setOperator] = useState<Operator>(null);
   const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
+  const [isPercentage, setIsPercentage] = useState<boolean>(false);
 
   const clearAll = (): void => {
     setDisplayValue('0');
     setPreviousValue(null);
     setOperator(null);
     setWaitingForOperand(false);
+    setIsPercentage(false);
   };
 
   const clearDisplay = (): void => {
     setDisplayValue('0');
+    setIsPercentage(false);
   };
 
   const toggleSign = (): void => {
-    const newValue = parseFloat(displayValue) * -1;
-    setDisplayValue(String(newValue));
+    if (isPercentage) {
+      const valueWithoutPercent = displayValue.replace('%', '');
+      const newValue = parseFloat(valueWithoutPercent) * -1;
+      setDisplayValue(String(newValue) + '%');
+    } else {
+      const newValue = parseFloat(displayValue) * -1;
+      setDisplayValue(String(newValue));
+    }
   };
 
   const inputPercent = (): void => {
-    const currentValue = parseFloat(displayValue);
-    const newValue = currentValue / 100;
-    setDisplayValue(String(newValue));
+    setDisplayValue(displayValue + '%');
+    setIsPercentage(true);
   };
 
   const inputDot = (): void => {
-    if (waitingForOperand) {
+    if (waitingForOperand || isPercentage) {
       setDisplayValue('0.');
       setWaitingForOperand(false);
+      setIsPercentage(false);
       return;
     }
 
@@ -45,16 +54,23 @@ const Calculator: React.FC = () => {
   };
 
   const inputDigit = (digit: number): void => {
-    if (waitingForOperand) {
+    if (waitingForOperand || isPercentage) {
       setDisplayValue(String(digit));
       setWaitingForOperand(false);
+      setIsPercentage(false);
     } else {
       setDisplayValue(displayValue === '0' ? String(digit) : displayValue + digit);
     }
   };
 
   const performOperation = (nextOperator: Operator): void => {
-    const inputValue = parseFloat(displayValue);
+    let inputValue: number;
+    if (isPercentage) {
+      inputValue = parseFloat(displayValue.replace('%', '')) / 100;
+      setIsPercentage(false);
+    } else {
+      inputValue = parseFloat(displayValue);
+    }
 
     if (previousValue === null) {
       setPreviousValue(inputValue);

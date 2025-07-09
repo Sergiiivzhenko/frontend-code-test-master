@@ -99,14 +99,32 @@ describe('Calculator', () => {
     expect(screen.getByTestId('calculator-display').textContent).toBe('5');
   });
 
-  it('calculates percentage correctly', () => {
+  it('displays percentage symbol correctly', () => {
     render(<Calculator />);
 
-    // Enter 50 and calculate 50%
+    // Enter 50 and press %
     fireEvent.click(screen.getByTestId('button-5'));
     fireEvent.click(screen.getByTestId('button-0'));
     fireEvent.click(screen.getByTestId('button-%'));
 
+    // Should display 50%
+    expect(screen.getByTestId('calculator-display').textContent).toBe('50%');
+  });
+
+  it('calculates percentage correctly in operations', () => {
+    render(<Calculator />);
+
+    // Enter 50%
+    fireEvent.click(screen.getByTestId('button-5'));
+    fireEvent.click(screen.getByTestId('button-0'));
+    fireEvent.click(screen.getByTestId('button-%'));
+
+    // Multiply by 1
+    fireEvent.click(screen.getByTestId('button-×'));
+    fireEvent.click(screen.getByTestId('button-1'));
+    fireEvent.click(screen.getByTestId('button-='));
+
+    // Should calculate 50% * 1 = 0.5
     expect(screen.getByTestId('calculator-display').textContent).toBe('0.5');
   });
 
